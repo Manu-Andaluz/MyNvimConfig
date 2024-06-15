@@ -132,20 +132,28 @@ return {
             return vim.fn.expand("%:p:h")
           end
 
+
+          local function should_show_previewer()
+            local width = vim.api.nvim_win_get_width(0)
+            return width > 200
+          end
+
           telescope.extensions.file_browser.file_browser({
             path = "%:p:h",
             cwd = telescope_buffer_dir(),
             respect_gitignore = false,
             hidden = true,
             grouped = true,
-            previewer = false,
             initial_mode = "normal",
-            layout_config = { height = 40 },
+            previewer = should_show_previewer(),
+            layout_config = { height = 0.9, width = 0.8, prompt_position = "top", horizontal  = {preview_width = 0.5} },
+            layout_strategy = "horizontal"
           })
         end,
         desc = "Open File Browser with the path of the current buffer",
       },
     },
+
     config = function(_, opts)
       local telescope = require("telescope")
       local actions = require("telescope.actions")
