@@ -12,7 +12,7 @@ return {
 			Normal = { bg = "#1a1b26" }, -- Replace with your desired color
 
 			-- Add this line to highlight the cursor line with a soft white
-			CursorLine = { bg = "#2c2e3e" }, -- Adjust the color code for desired softness
+			CursorLine = { bg = "#2c2e3e", ctermbg = 236 },
 		},
 	},
 }

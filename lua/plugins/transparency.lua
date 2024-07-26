@@ -11,6 +11,7 @@ return {
 					"NeoTreeNormalNC",
 					"NeoTreeEndOfBuffer",
 				},
+				exclude_groups = { "CursorLine" }, -- Add this line
 			})
 			vim.cmd([[TransparentEnable]])
 		end,
