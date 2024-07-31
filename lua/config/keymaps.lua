@@ -12,7 +12,8 @@ keymap.set("n", "+", "<C-a>")
 keymap.set("n", "-", "<C-x>")
 
 -- Delete a word backwards
-keymap.set("n", "dw", 'vb"_d')
+keymap.set("n", "de", 've"_d')
+keymap.set("n", "db", 'vb"_d')
 
 -- Select all
 keymap.set("n", "<C-a>", "gg<S-v>G")
@@ -62,3 +63,36 @@ keymap.set("n", "<leader>;", function()
 		reuse_win = true,
 	})
 end, { desc = "Go to definition" })
+
+-- Replace all exact occurrences of the current word in the root directory
+keymap.set("n", "<leader>rw", function()
+	local word = vim.fn.expand("<cword>")
+	local qf_list = {}
+
+	-- Search for the exact word in all files
+	local handle = io.popen(string.format("rg --vimgrep '\\b%s\\b'", word))
+	if handle then
+		for line in handle:lines() do
+			table.insert(qf_list, {
+				filename = vim.fn.fnamemodify(line:match("^(.-):%d+"), ":p"),
+				lnum = tonumber(line:match(":(%d+):")),
+				col = tonumber(line:match(":%d+:(%d+):")),
+				text = line:match(":%d+:%d+:(.+)"),
+			})
+		end
+		handle:close()
+	end
+
+	-- Populate the quickfix list
+	vim.fn.setqflist(qf_list)
+
+	-- Open the quickfix window
+	vim.cmd("copen")
+
+	-- Prompt for the replacement word
+	local replacement = vim.fn.input("Replace '" .. word .. "' with: ")
+	if replacement ~= "" then
+		-- Perform the replacement
+		vim.cmd(string.format("cfdo %%s/\\<%s\\>/%s/gc | update", word, replacement))
+	end
+end, { desc = "Replace exact word in project" })

@@ -4,29 +4,10 @@ return {
 	dependencies = {
 		"rcarriga/nvim-dap-ui",
 		"nvim-neotest/nvim-nio",
-		"David-Kunz/jester", -- Add Jester as a dependency
 	},
 	config = function()
 		local dap = require("dap")
 		local dapui = require("dapui")
-		local jester = require("jester")
-
-		-- Jester setup
-		jester.setup({
-			cmd = "npm run test:e2e -t '$result' -- $file", -- Adjust this if needed
-			dap = {
-				type = "pwa-node",
-				request = "launch",
-				cwd = vim.fn.getcwd(),
-				runtimeArgs = { "--inspect-brk", "$path_to_jest", "--no-coverage", "-t", "$result", "--", "$file" },
-				args = { "--no-cache" },
-				sourceMaps = true,
-				protocol = "inspector",
-				console = "integratedTerminal",
-				port = 9229,
-				disableOptimisticBPs = true,
-			},
-		})
 
 		-- DAP setup for pwa-node
 		dap.adapters["pwa-node"] = {
@@ -43,6 +24,22 @@ return {
 		}
 
 		dap.configurations.typescript = {
+			{
+				type = "pwa-node",
+				request = "launch",
+				name = "Debug Nearest Test",
+				runtimeExecutable = "node",
+				runtimeArgs = {
+					"npm run test:e2e",
+					"${file}",
+					"-- -t",
+					"${jest.testName}",
+				},
+				rootPath = "${workspaceFolder}",
+				cwd = "${workspaceFolder}",
+				console = "integratedTerminal",
+				internalConsoleOptions = "neverOpen",
+			},
 			{
 				type = "pwa-node",
 				request = "launch",
@@ -73,12 +70,6 @@ return {
 		dap.listeners.before.event_exited["dapui_config"] = function()
 			dapui.close()
 		end
-
-		-- Keymaps for Jester
-		vim.keymap.set("n", "<Leader>jr", jester.run, { desc = "Jest run" })
-		vim.keymap.set("n", "<Leader>jd", jester.debug, { desc = "Jest debug" })
-		vim.keymap.set("n", "<Leader>jf", jester.run_file, { desc = "Jest run file" })
-		vim.keymap.set("n", "<Leader>jl", jester.run_last, { desc = "Jest run last" })
 
 		-- Existing keymaps
 		vim.keymap.set("n", "<Leader>dt", dap.toggle_breakpoint, {})
